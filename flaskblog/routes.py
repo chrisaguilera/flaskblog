@@ -7,8 +7,8 @@ import json
 @app.route("/")
 @app.route("/home")
 def home():
-    for post_object in Post.objects:
-        posts = []
+    posts = []
+    for post_object in Post.objects: 
         post = {
                 'title': post_object.title,
                 'content': post_object.content,
@@ -16,6 +16,7 @@ def home():
                 'author': post_object.author.username
                 }
         posts.append(post)
+    posts.reverse()
     return render_template('home.html', posts=posts)
 
 @app.route("/about")
