@@ -1,13 +1,20 @@
 from flask import render_template, url_for, flash, redirect
-from flaskblog import app, db, bcrypt
+from flaskblog import app, bcrypt
 from flaskblog.forms import RegistrationForm, LoginForm
+from flaskblog.models import User, Post
+import json
 
 @app.route("/")
 @app.route("/home")
 def home():
-    posts = []
-    posts_collection = db['posts'].find()
-    for post in posts_collection:
+    for post_object in Post.objects:
+        posts = []
+        post = {
+                'title': post_object.title,
+                'content': post_object.content,
+                'date_posted': post_object.date_posted,
+                'author': post_object.author.username
+                }
         posts.append(post)
     return render_template('home.html', posts=posts)
 
@@ -21,13 +28,8 @@ def register():
     if form.validate_on_submit():
         # Hash password
         hashed_pw = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        # Commit new user to database 
-        user = {
-            'username': form.username.data,
-            'email': form.email.data,
-            'password': hashed_pw
-        }
-        db.users.insert_one(user)
+        user = User(username=form.username.data, email=form.email.data, password=hashed_pw)
+        user.save()
         flash(f'Account created for {form.username.data}!', 'success')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
