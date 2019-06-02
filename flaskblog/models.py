@@ -1,7 +1,13 @@
 from mongoengine import Document, StringField, DateTimeField, ReferenceField
+from flask_login import UserMixin
+from flaskblog import login_manager
 import datetime
 
-class User(Document):
+@login_manager.user_loader
+def load_user(user_id):
+    return User.objects(id=user_id)[0]
+
+class User(Document, UserMixin):
     username = StringField(unique=True, required=True)
     email = StringField(unique=True, required=True)
     password = StringField(required=True)
