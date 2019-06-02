@@ -12,5 +12,7 @@ connect(db='flaskBlog',host='mongodb+srv://chrisaguilera:lakers2416!@cluster0-de
 
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+login_manager.login_message_category = 'info'
 
 from flaskblog import routes
