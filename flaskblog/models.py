@@ -11,6 +11,7 @@ class User(Document, UserMixin):
     username = StringField(unique=True, required=True)
     email = StringField(unique=True, required=True)
     password = StringField(required=True)
+    image_file = StringField(default='default.jpg')
 
 class Post(Document):
     title = StringField(required=True)
