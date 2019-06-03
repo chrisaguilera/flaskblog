@@ -4,7 +4,7 @@ import json
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request
 from flaskblog import app, bcrypt
-from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm
+from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
 from flaskblog.models import User, Post
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -13,13 +13,7 @@ from flask_login import login_user, current_user, logout_user, login_required
 def home():
     posts = []
     for post_object in Post.objects: 
-        post = {
-                'title': post_object.title,
-                'content': post_object.content,
-                'date_posted': post_object.date_posted,
-                'author': post_object.author.username
-                }
-        posts.append(post)
+        posts.append(post_object)
     posts.reverse()
     return render_template('home.html', posts=posts)
 
@@ -88,3 +82,15 @@ def account():
         form.email.data = current_user.email
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('account.html', title='Account', image_file=image_file, form=form)
+
+@app.route("/post/new", methods=['GET', 'POST'])
+@login_required
+def new_post():
+    form = PostForm()
+    if form.validate_on_submit():
+        user = User.objects(username=current_user.username).first()
+        post = Post(title=form.title.data, content=form.content.data, author=user)
+        post.save()
+        flash('Your post has been created!', 'success')
+        return redirect(url_for('home'))
+    return render_template('create_post.html', title="New Post", form=form)
