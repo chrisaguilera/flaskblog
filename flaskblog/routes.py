@@ -94,3 +94,11 @@ def new_post():
         flash('Your post has been created!', 'success')
         return redirect(url_for('home'))
     return render_template('create_post.html', title="New Post", form=form)
+
+@app.route("/post/<post_id>")
+def post(post_id):
+    post = Post.objects(id=post_id).first()
+    if not post:
+        abort(404)
+    return render_template('post.html', title=post.title, post=post)
+

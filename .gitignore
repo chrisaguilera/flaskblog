@@ -3,3 +3,5 @@ flaskblog/__pycache__
 .*
 
 !.gitignore
+
+flaskblog/static/profile_pics/*
