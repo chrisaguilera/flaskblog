@@ -5,7 +5,7 @@ import datetime
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.objects(id=user_id)[0]
+    return User.objects(id=user_id).first()
 
 class User(Document, UserMixin):
     username = StringField(unique=True, required=True)

@@ -2,7 +2,7 @@ import os
 import secrets
 import json
 from PIL import Image
-from flask import render_template, url_for, flash, redirect, request
+from flask import render_template, url_for, flash, redirect, request, abort
 from flaskblog import app, bcrypt
 from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
 from flaskblog.models import User, Post
@@ -93,7 +93,7 @@ def new_post():
         post.save()
         flash('Your post has been created!', 'success')
         return redirect(url_for('home'))
-    return render_template('create_post.html', title="New Post", form=form)
+    return render_template('create_post.html', title="New Post", form=form, legend="Create New Post")
 
 @app.route("/post/<post_id>")
 def post(post_id):
@@ -102,3 +102,33 @@ def post(post_id):
         abort(404)
     return render_template('post.html', title=post.title, post=post)
 
+@app.route("/post/<post_id>/update", methods=['GET', 'POST'])
+@login_required
+def update_post(post_id):
+    post = Post.objects(id=post_id).first()
+    if not post:
+        abort(404)
+    user = User.objects(id=current_user.id).first()
+    if post.author != user:
+        abort(403)
+    form = PostForm()
+    if form.validate_on_submit():
+        post.update(title=form.title.data, content=form.content.data)
+        flash('Your post has been updated!', 'success')
+        return redirect(url_for('post', post_id=post.id))
+    elif request.method == 'GET':
+        form.title.data  = post.title
+        form.content.data = post.content
+        return render_template('create_post.html', title="Update Post", form=form, legend="Update Post")
+
+@app.route("/post/<post_id>/delete", methods=['POST'])
+def delete_post(post_id):
+    post = Post.objects(id=post_id).first()
+    if not post:
+        abort(404)
+    user = User.objects(id=current_user.id).first()
+    if post.author != user:
+        abort(403)
+    post.delete()
+    flash('Your post has been deleted!', 'success')
+    return redirect(url_for('home'))
